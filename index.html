@@ -1,44 +1,57 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arnold Schwarzenegger</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-            text-align: center;
-        }
-        header {
-            background-color: #333;
-            color: white;
-            padding: 20px;
-            font-size: 24px;
-        }
-        .content {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
-        }
-        img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 10px;
-        }
-    </style>
-</head>
-<body>
-    <header>Arnold Schwarzenegger</header>
-    <div class="content">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/3/3d/Arnold_Schwarzenegger_by_Gage_Skidmore_4.jpg" alt="Arnold Schwarzenegger">
-        <h2>Über Arnold Schwarzenegger</h2>
-        <p>Arnold Schwarzenegger ist ein österreichisch-amerikanischer Schauspieler, ehemaliger Bodybuilder und Politiker. Er wurde am 30. Juli 1947 geboren und ist bekannt für Filme wie Terminator, Predator und Conan der Barbar. Von 2003 bis 2011 war er Gouverneur von Kalifornien.</p>
-    </div>
-</body>
-</html>
+# Maße des Hauses
+width = 12     # Breite (x)
+length = 15    # Tiefe (z)
+height = 5     # Höhe pro Stockwerk
+
+# Startpunkt des Hauses (leicht angepasst für guten Platz)
+x = int(x + 5)
+y = int(y)
+z = int(z)
+
+# Hausgrundriss (Erdgeschoss)
+mc.setBlocks(x, y, z, x+width-1, y+height-1, z+length-1, block.BRICK_BLOCK)
+
+# Innenraum leeren (Erdgeschoss)
+mc.setBlocks(x+1, y+1, z+1, x+width-2, y+height-2, z+length-2, block.AIR)
+
+# Tür Erdgeschoss
+mc.setBlock(x + width//2, y+1, z, block.DOOR_WOOD.id, 0)
+mc.setBlock(x + width//2, y+2, z, block.DOOR_WOOD.id, 8)
+
+# Fenster Erdgeschoss
+mc.setBlocks(x+2, y+2, z, x+3, y+3, z, block.GLASS)
+
+# Treppe ins 1. Stockwerk
+for i in range(height-1):
+    mc.setBlock(x+1+i, y+1+i, z+2, block.STAIRS_WOOD.id, 1)
+
+# 1. Stockwerk
+mc.setBlocks(x, y+height, z, x+width-1, y+2*height-1, z+length-1, block.STONE)
+
+# Innenraum 1. Stockwerk leeren
+mc.setBlocks(x+1, y+height+1, z+1, x+width-2, y+2*height-2, z+length-2, block.AIR)
+
+# Fenster 1. Stockwerk
+mc.setBlocks(x+2, y+height+2, z+length-1, x+3, y+height+3, z+length-1, block.GLASS)
+
+# Tür zum Balkon
+mc.setBlock(x + width//2, y+height+1, z+length-1, block.DOOR_WOOD.id, 0)
+mc.setBlock(x + width//2, y+height+2, z+length-1, block.DOOR_WOOD.id, 8)
+
+# Balkon
+mc.setBlocks(x-1, y+height, z+length-2, x+width, y+height, z+length+2, block.WOOD_PLANKS)
+mc.setBlocks(x-1, y+height+1, z+length-2, x-1, y+height+2, z+length+2, block.FENCE)
+mc.setBlocks(x+width, y+height+1, z+length-2, x+width, y+height+2, z+length+2, block.FENCE)
+mc.setBlocks(x-1, y+height+1, z+length+2, x+width, y+height+2, z+length+2, block.FENCE)
+
+# Dach (Flachdach)
+mc.setBlocks(x-1, y+2*height, z-1, x+width, y+2*height, z+length, block.WOOD)
+
+# Alternativ: Satteldach (auskommentieren, falls Flachdach nicht gewünscht)
+"""
+for i in range(6):
+    mc.setBlocks(x-1+i, y+2*height+i, z-1, x+width-i, y+2*height+i, z+length, block.WOOD)
+"""
+
+# Spieler auf das Dach teleportieren zur Ansicht
+mc.player.setPos(x + width/2, y + 2*height + 2, z + length/2)
