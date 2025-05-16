@@ -1,57 +1,115 @@
+# Minecraft-Pi importieren
+from mcpi.minecraft import Minecraft
+from mcpi import block
+
+# Verbindung zu Minecraft herstellen
+mc = Minecraft.create()
+
+# Spielfigur an eine sichere Stelle setzen
+mc.player.setPos(118, 1, 0)
+
+# Grundfläche vorbereiten (Luft, Boden, Gras)
+mc.setBlocks(-200, 0, -200, 200, 100, 200, block.AIR.id)  # Luft
+mc.setBlocks(-200, -3, -200, 200, -1, 200, block.STONE.id)  # Untergrund
+mc.setBlocks(-200, 0, -200, 200, 0, 200, block.GRASS.id)  # Gras
+
+# Straße bauen
+mc.setBlocks(-200, -1, -2, 200, 0, 2, block.STONE.id)
+
+# Bordsteine links und rechts
+mc.setBlocks(-200, 0, -3, 200, 0, -3, block.COBBLESTONE.id)
+mc.setBlocks(-200, 0, 3, 200, 0, 3, block.COBBLESTONE.id)
+
+# Zäune links und rechts
+mc.setBlocks(-200, 1, -4, 200, 1, -4, block.FENCE.id)
+mc.setBlocks(-200, 1, 4, 200, 1, 4, block.FENCE.id)
+
+# Lücken in den Zäunen und Fußwege
+for i in range(-10, 10):
+    if i % 2 == 1:
+        mc.setBlock(12*i, 1, 4, block.AIR.id)  # Lücke im Zaun
+        mc.setBlocks(12*i, 0, 3, 12*i, 0, 15, block.STONE.id)  # Fußweg
+    else:
+        mc.setBlock(12*i, 1, -4, block.AIR.id)
+        mc.setBlocks(12*i, 0, -3, 12*i, 0, -15, block.STONE.id)
+
+# ===============================
+# Haus wird jetzt gebaut!
+# ===============================
+
+# Position des Spielers holen
+x, y, z = mc.player.getTilePos()
+
+# Haus soll etwas hinter dem Spieler gebaut werden
+haus_x = x - 6
+haus_y = y
+haus_z = z - 20
+
 # Maße des Hauses
-width = 12     # Breite (x)
-length = 15    # Tiefe (z)
-height = 5     # Höhe pro Stockwerk
+breite = 12
+tiefe = 15
+hoehe = 5
 
-# Startpunkt des Hauses (leicht angepasst für guten Platz)
-x = int(x + 5)
-y = int(y)
-z = int(z)
+# Erdgeschoss außen bauen
+mc.setBlocks(haus_x, haus_y, haus_z,
+             haus_x + breite - 1, haus_y + hoehe - 1, haus_z + tiefe - 1,
+             block.BRICK_BLOCK.id)
 
-# Hausgrundriss (Erdgeschoss)
-mc.setBlocks(x, y, z, x+width-1, y+height-1, z+length-1, block.BRICK_BLOCK)
+# Innenraum leer machen
+mc.setBlocks(haus_x + 1, haus_y + 1, haus_z + 1,
+             haus_x + breite - 2, haus_y + hoehe - 2, haus_z + tiefe - 2,
+             block.AIR.id)
 
-# Innenraum leeren (Erdgeschoss)
-mc.setBlocks(x+1, y+1, z+1, x+width-2, y+height-2, z+length-2, block.AIR)
+# Tür im Erdgeschoss
+mc.setBlock(haus_x + breite // 2, haus_y + 1, haus_z, block.DOOR_WOOD.id)
+mc.setBlock(haus_x + breite // 2, haus_y + 2, haus_z, block.DOOR_WOOD.id + 8)
 
-# Tür Erdgeschoss
-mc.setBlock(x + width//2, y+1, z, block.DOOR_WOOD.id, 0)
-mc.setBlock(x + width//2, y+2, z, block.DOOR_WOOD.id, 8)
+# Fenster im Erdgeschoss
+mc.setBlocks(haus_x + 2, haus_y + 2, haus_z, haus_x + 3, haus_y + 3, haus_z, block.GLASS.id)
 
-# Fenster Erdgeschoss
-mc.setBlocks(x+2, y+2, z, x+3, y+3, z, block.GLASS)
+# Treppe nach oben im Haus
+for i in range(hoehe - 1):
+    mc.setBlock(haus_x + 1 + i, haus_y + 1 + i, haus_z + 2, block.STAIRS_WOOD.id)
 
-# Treppe ins 1. Stockwerk
-for i in range(height-1):
-    mc.setBlock(x+1+i, y+1+i, z+2, block.STAIRS_WOOD.id, 1)
+# 1. Stock außen bauen
+mc.setBlocks(haus_x, haus_y + hoehe, haus_z,
+             haus_x + breite - 1, haus_y + 2*hoehe - 1, haus_z + tiefe - 1,
+             block.STONE.id)
 
-# 1. Stockwerk
-mc.setBlocks(x, y+height, z, x+width-1, y+2*height-1, z+length-1, block.STONE)
+# Innenraum im 1. Stock leer machen
+mc.setBlocks(haus_x + 1, haus_y + hoehe + 1, haus_z + 1,
+             haus_x + breite - 2, haus_y + 2*hoehe - 2, haus_z + tiefe - 2,
+             block.AIR.id)
 
-# Innenraum 1. Stockwerk leeren
-mc.setBlocks(x+1, y+height+1, z+1, x+width-2, y+2*height-2, z+length-2, block.AIR)
+# Fenster im 1. Stock
+mc.setBlocks(haus_x + 2, haus_y + hoehe + 2, haus_z + tiefe - 1,
+             haus_x + 3, haus_y + hoehe + 3, haus_z + tiefe - 1,
+             block.GLASS.id)
 
-# Fenster 1. Stockwerk
-mc.setBlocks(x+2, y+height+2, z+length-1, x+3, y+height+3, z+length-1, block.GLASS)
+# Tür zum Balkon im 1. Stock
+mc.setBlock(haus_x + breite // 2, haus_y + hoehe + 1, haus_z + tiefe - 1, block.DOOR_WOOD.id)
+mc.setBlock(haus_x + breite // 2, haus_y + hoehe + 2, haus_z + tiefe - 1, block.DOOR_WOOD.id + 8)
 
-# Tür zum Balkon
-mc.setBlock(x + width//2, y+height+1, z+length-1, block.DOOR_WOOD.id, 0)
-mc.setBlock(x + width//2, y+height+2, z+length-1, block.DOOR_WOOD.id, 8)
+# Balkon bauen
+mc.setBlocks(haus_x - 1, haus_y + hoehe, haus_z + tiefe - 2,
+             haus_x + breite, haus_y + hoehe, haus_z + tiefe + 2,
+             block.WOOD_PLANKS.id)
 
-# Balkon
-mc.setBlocks(x-1, y+height, z+length-2, x+width, y+height, z+length+2, block.WOOD_PLANKS)
-mc.setBlocks(x-1, y+height+1, z+length-2, x-1, y+height+2, z+length+2, block.FENCE)
-mc.setBlocks(x+width, y+height+1, z+length-2, x+width, y+height+2, z+length+2, block.FENCE)
-mc.setBlocks(x-1, y+height+1, z+length+2, x+width, y+height+2, z+length+2, block.FENCE)
+# Zaun um den Balkon
+mc.setBlocks(haus_x - 1, haus_y + hoehe + 1, haus_z + tiefe - 2,
+             haus_x - 1, haus_y + hoehe + 2, haus_z + tiefe + 2,
+             block.FENCE.id)
+mc.setBlocks(haus_x + breite, haus_y + hoehe + 1, haus_z + tiefe - 2,
+             haus_x + breite, haus_y + hoehe + 2, haus_z + tiefe + 2,
+             block.FENCE.id)
+mc.setBlocks(haus_x - 1, haus_y + hoehe + 1, haus_z + tiefe + 2,
+             haus_x + breite, haus_y + hoehe + 2, haus_z + tiefe + 2,
+             block.FENCE.id)
 
-# Dach (Flachdach)
-mc.setBlocks(x-1, y+2*height, z-1, x+width, y+2*height, z+length, block.WOOD)
+# Flachdach bauen
+mc.setBlocks(haus_x - 1, haus_y + 2*hoehe, haus_z - 1,
+             haus_x + breite, haus_y + 2*hoehe, haus_z + tiefe,
+             block.WOOD.id)
 
-# Alternativ: Satteldach (auskommentieren, falls Flachdach nicht gewünscht)
-"""
-for i in range(6):
-    mc.setBlocks(x-1+i, y+2*height+i, z-1, x+width-i, y+2*height+i, z+length, block.WOOD)
-"""
-
-# Spieler auf das Dach teleportieren zur Ansicht
-mc.player.setPos(x + width/2, y + 2*height + 2, z + length/2)
+# Spieler auf das Dach setzen (zur Kontrolle)
+mc.player.setPos(haus_x + breite / 2, haus_y + 2 * hoehe + 2, haus_z + tiefe / 2)
